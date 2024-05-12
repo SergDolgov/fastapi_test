@@ -2,11 +2,15 @@ from collections.abc import AsyncGenerator
 
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 
-from config import SQLLITE_DATABASE_URI
+from config import ENVIRONMENT, SQLLITE_DATABASE_URI, DEFAULT_SQLALCHEMY_DATABASE_URI
 from models import Model
 
+if ENVIRONMENT == "DEV":
+    sqlalchemy_database_uri = SQLLITE_DATABASE_URI
+else:
+    sqlalchemy_database_uri = DEFAULT_SQLALCHEMY_DATABASE_URI
 
-async_engine = create_async_engine(SQLLITE_DATABASE_URI, pool_pre_ping=True)
+async_engine = create_async_engine(sqlalchemy_database_uri, pool_pre_ping=True)
 async_session = async_sessionmaker(async_engine, expire_on_commit=False)
 
 
