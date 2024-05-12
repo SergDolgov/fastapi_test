@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    env_file:
+      - .env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data    
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+    healthcheck:
+      test: "pg_isready -U postgres"
+
+  web:
+    depends_on:
+      - postgres
+    restart: "unless-stopped"
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    environment:
+      - DEFAULT_DATABASE_HOSTNAME=postgres
+      - DEFAULT_DATABASE_PORT=5432
+    ports:
+      - 80:8000
+      
+  app:
+    build:
+      context: .
+    env_file:
+      - .env
+    container_name: fastapi_test_app
+    # command: ["/fastapi_test/docker/app.sh"]    
+    ports:
+      - 9999:8000
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:
